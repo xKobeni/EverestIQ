@@ -1,0 +1,84 @@
+EverestIQ
+A Machine Learning-Powered Expedition Success and Risk Assessment Platform
+Overview
+EverestIQ is a predictive analytics system designed to analyze historical Himalayan expedition data and provide valuable insights for mountaineering planning and safety. Leveraging machine learning, EverestIQ predicts expedition outcomes, assesses risks, and classifies mountain peaks by difficulty to assist climbers, guides, and planners in making data-driven decisions.
+With the increasing popularity and risks of high-altitude expeditions, EverestIQ empowers stakeholders by forecasting success probabilities, summit durations, and fatality likelihoods — thereby improving preparation, safety, and strategic planning.
+Goals
+To predict whether an expedition will be successful based on logistical and environmental factors.
+To assess the risk of fatalities or accidents during expeditions.
+To estimate the time it might take for a team to summit a peak.
+To classify Himalayan peaks based on historical expedition data to understand their difficulty levels.
+To develop a modular and interpretable machine learning framework using real expedition records.
+System Features Overview:
+Dashboard
+Visual analytics of expedition outcomes, success rates, and fatality statistics.
+Searchable peak profiles with historical difficulty ratings.
+Expedition Success Prediction
+Predicts whether a planned expedition will reach the summit.
+Useful for risk evaluation and preparation.
+Risk Assessment Tool
+Estimates the probability of fatalities based on historical patterns and expedition profiles.
+Summit Time Estimation (if data allows)
+Predicts the estimated duration from base to summit.
+Assists in planning timelines and resource allocations.
+Peak Difficulty Classification
+Categorizes Himalayan peaks as Easy, Moderate, or Hard.
+Uses success rate, number of attempts, and fatality rate.
+Machine Learning Techniques:
+
+Model
+Task
+Technique
+Model 1
+Expedition Success Prediction
+Classification (Random Forest / XGBoost / Logistic Regression)
+Model 2
+Fatality Risk Assessment
+Imbalanced Classification (SMOTE + Ensemble Methods)
+Model 3
+Summit Duration Estimation
+Regression (Linear Regression / Gradient Boosting)
+Model 4
+Peak Difficulty Classification
+Clustering (K-Means) + Classification
+
+
+Model 1: Expedition Success Prediction
+Type: Binary Classification
+Input Features:
+season – Categorical (Spring, Autumn, etc.)
+team_size – Integer
+oxygen_used – Boolean
+route – Categorical
+hired_staff – Integer
+peak_id – Categorical
+Output:
+success – Boolean (Summit reached or not)
+Model 2: Fatality Risk Assessment
+Type: Binary/Multiclass Classification
+Input Features:
+team_size – Integer
+experience_level – Categorical (if available)
+weather_severity – Proxy via season/termination reason
+route_difficulty – Categorical (if available)
+peak_id, oxygen_used, hired_staff
+Output:
+fatality_risk – Low / Medium / High OR Boolean
+Model 3: Summit Time Estimation
+Type: Regression
+Input Features:
+start_date, summit_date – Used to calculate time (if available)
+team_size, route, oxygen_used
+peak_id, season
+Output:
+time_to_summit – Estimated number of days or hours
+Model 4: Peak Difficulty Classification
+Type: Clustering + Supervised Classification
+Input Features (Aggregated by Peak):
+success_rate
+average_team_size
+fatality_rate
+average_time_to_summit
+Output:
+difficulty_level – Easy / Moderate / Hard
+

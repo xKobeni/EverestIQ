@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Fatality Risk Prediction - EverestIQ{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<style>
+#predictionResult { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-8">Fatality Risk Prediction</h1>
+
+<form id="fatalityRiskForm" class="prediction-form">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <label for="totmembers" class="form-label">Total Members:</label>
+            <input type="number" class="form-input" id="totmembers" name="totmembers" required>
+        </div>
+        <div>
+            <label for="tothired" class="form-label">Total Hired Staff:</label>
+            <input type="number" class="form-input" id="tothired" name="tothired" required>
+        </div>
+        <div>
+            <label for="o2used" class="form-label">Oxygen Used:</label>
+            <select class="form-input" id="o2used" name="o2used" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+        <div>
+            <label for="season" class="form-label">Season:</label>
+            <select class="form-input" id="season" name="season" required>
+                <option value="Spring">Spring</option>
+                <option value="Summer">Summer</option>
+                <option value="Autumn">Autumn</option>
+                <option value="Winter">Winter</option>
+            </select>
+        </div>
+        <div>
+            <label for="peakid" class="form-label">Peak ID:</label>
+            <select class="form-input" id="peakid" name="peakid" required>
+                <option value="EVEREST">EVEREST</option>
+                <option value="K2">K2</option>
+                <option value="KANGCHENJUNGA">KANGCHENJUNGA</option>
+                <option value="LHOTSE">LHOTSE</option>
+                <option value="MAKALU">MAKALU</option>
+                <!-- Add more peak IDs as needed -->
+            </select>
+        </div>
+        <div>
+            <label for="route1" class="form-label">Route:</label>
+            <select class="form-input" id="route1" name="route1" required>
+                <option value="South Col">South Col</option>
+                <option value="North Ridge">North Ridge</option>
+                <option value="West Ridge">West Ridge</option>
+                <option value="Abruzzi Spur">Abruzzi Spur</option>
+                <!-- Add more routes as needed -->
+            </select>
+        </div>
+        <div>
+            <label for="success1" class="form-label">Success:</label>
+            <select class="form-input" id="success1" name="success1" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+        <div>
+            <label for="year" class="form-label">Year:</label>
+            <input type="number" class="form-input" id="year" name="year" required>
+        </div>
+        <div>
+            <label for="heightm" class="form-label">Peak Height (m):</label>
+            <input type="number" class="form-input" id="heightm" name="heightm" required>
+        </div>
+        <div>
+            <label for="camps" class="form-label">Number of Camps:</label>
+            <input type="number" class="form-input" id="camps" name="camps" required>
+        </div>
+        <div>
+            <label for="rope" class="form-label">Fixed Rope Length:</label>
+            <input type="number" class="form-input" id="rope" name="rope" required>
+        </div>
+        <div>
+            <label for="comrte" class="form-label">Commercial Route:</label>
+            <select class="form-input" id="comrte" name="comrte" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+        <div>
+            <label for="stdrte" class="form-label">Standard Route:</label>
+            <select class="form-input" id="stdrte" name="stdrte" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+        <div>
+            <label for="o2climb" class="form-label">Oxygen During Climb:</label>
+            <select class="form-input" id="o2climb" name="o2climb" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+        <div>
+            <label for="o2sleep" class="form-label">Oxygen During Sleep:</label>
+            <select class="form-input" id="o2sleep" name="o2sleep" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+        <div>
+            <label for="o2medical" class="form-label">Medical Oxygen:</label>
+            <select class="form-input" id="o2medical" name="o2medical" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <button type="submit" class="btn-primary">Predict Risk Level</button>
+    </div>
+</form>
+
+<div id="predictionResult" class="prediction-result">
+    <h3 class="text-xl font-semibold mb-2">Prediction Result</h3>
+    <p id="predictionText" class="mb-2"></p>
+</div>
+
+<script>
+    document.getElementById('fatalityRiskForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const data = {};
+        formData.forEach((value, key) => data[key] = value);
+
+        fetch('/predict_fatality_risk', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            document.getElementById('predictionText').innerHTML = `<h3>Predicted Risk Level: ${result.predicted_risk_level}</h3>`;
+            document.getElementById('predictionResult').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('predictionText').innerHTML = '<h3>Error occurred while predicting risk level.</h3>';
+            document.getElementById('predictionResult').style.display = 'block';
+        });
+    });
+</script>
+{% endblock %} 

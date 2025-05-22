@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Expedition Predictor - EverestIQ{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-8">Himalayan Expedition Success Predictor</h1>
+
+<form id="predictionForm" class="prediction-form">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <label for="year" class="form-label">Year</label>
+            <input type="number" class="form-input" id="year" required>
+        </div>
+        <div>
+            <label for="season" class="form-label">Season</label>
+            <select class="form-input" id="season" required>
+                <option value="Spring">Spring</option>
+                <option value="Summer">Summer</option>
+                <option value="Autumn">Autumn</option>
+                <option value="Winter">Winter</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="totmembers" class="form-label">Total Members</label>
+            <input type="number" class="form-input" id="totmembers" required>
+        </div>
+        <div>
+            <label for="tothired" class="form-label">Total Hired Personnel</label>
+            <input type="number" class="form-input" id="tothired" required>
+        </div>
+
+        <div>
+            <label for="heightm" class="form-label">Peak Height (meters)</label>
+            <input type="number" class="form-input" id="heightm" required>
+        </div>
+        <div>
+            <label for="camps" class="form-label">Number of High Camps</label>
+            <input type="number" class="form-input" id="camps" required>
+        </div>
+
+        <div>
+            <label for="rope" class="form-label">Fixed Rope (meters)</label>
+            <input type="number" class="form-input" id="rope" required>
+        </div>
+        <div>
+            <label for="o2used" class="form-label">Oxygen Used</label>
+            <select class="form-input" id="o2used" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="o2climb" class="form-label">Oxygen During Climb</label>
+            <select class="form-input" id="o2climb" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="o2sleep" class="form-label">Oxygen During Sleep</label>
+            <select class="form-input" id="o2sleep" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="o2medical" class="form-label">Medical Oxygen</label>
+            <select class="form-input" id="o2medical" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="comrte" class="form-label">Commercial Route</label>
+            <select class="form-input" id="comrte" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+        <div>
+            <label for="stdrte" class="form-label">Standard Route</label>
+            <select class="form-input" id="stdrte" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <button type="submit" class="btn-primary">Predict Success</button>
+    </div>
+</form>
+
+<div id="predictionResult" class="prediction-result">
+    <h3 class="text-xl font-semibold mb-2">Prediction Result</h3>
+    <p id="predictionText" class="mb-2"></p>
+    <p class="font-medium">Success Probability: <span id="probability"></span>%</p>
+</div>
+
+<script>
+    document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+            year: document.getElementById('year').value,
+            season: document.getElementById('season').value,
+            totmembers: document.getElementById('totmembers').value,
+            tothired: document.getElementById('tothired').value,
+            heightm: document.getElementById('heightm').value,
+            o2used: document.getElementById('o2used').value,
+            o2climb: document.getElementById('o2climb').value,
+            o2sleep: document.getElementById('o2sleep').value,
+            o2medical: document.getElementById('o2medical').value,
+            camps: document.getElementById('camps').value,
+            rope: document.getElementById('rope').value,
+            comrte: document.getElementById('comrte').value,
+            stdrte: document.getElementById('stdrte').value
+        };
+
+        try {
+            const response = await fetch('/prediction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                const resultDiv = document.getElementById('predictionResult');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'prediction-result ' + 
+                    (result.probability > 0.5 ? 'success' : 'failure');
+                
+                document.getElementById('predictionText').textContent = result.prediction;
+                document.getElementById('probability').textContent = 
+                    (result.probability * 100).toFixed(2);
+            } else {
+                alert('Error: ' + result.error);
+            }
+        } catch (error) {
+            alert('Error making prediction: ' + error);
+        }
+    });
+</script>
+{% endblock %}

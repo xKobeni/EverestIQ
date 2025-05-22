@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Summit Time Prediction - EverestIQ{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<style>
+#predictionResult { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-8">Summit Time Prediction</h1>
+
+<form id="summitTimeForm" class="prediction-form">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <label for="year" class="form-label">Year:</label>
+            <input type="number" class="form-input" id="year" name="year" required>
+        </div>
+        <div>
+            <label for="season" class="form-label">Season:</label>
+            <select class="form-input" id="season" name="season" required>
+                <option value="Spring">Spring</option>
+                <option value="Summer">Summer</option>
+                <option value="Autumn">Autumn</option>
+                <option value="Winter">Winter</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="totmembers" class="form-label">Total Members:</label>
+            <input type="number" class="form-input" id="totmembers" name="totmembers" required>
+        </div>
+        <div>
+            <label for="tothired" class="form-label">Total Hired Staff:</label>
+            <input type="number" class="form-input" id="tothired" name="tothired" required>
+        </div>
+
+        <div>
+            <label for="heightm" class="form-label">Mountain Height (meters):</label>
+            <input type="number" class="form-input" id="heightm" name="heightm" required>
+        </div>
+        <div>
+            <label for="camps" class="form-label">Number of Camps:</label>
+            <input type="number" class="form-input" id="camps" name="camps" required>
+        </div>
+
+        <div>
+            <label for="rope" class="form-label">Rope Length (meters):</label>
+            <input type="number" class="form-input" id="rope" name="rope" required>
+        </div>
+        <div>
+            <label for="comrte" class="form-label">Commercial Route:</label>
+            <select class="form-input" id="comrte" name="comrte" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="stdrte" class="form-label">Standard Route:</label>
+            <select class="form-input" id="stdrte" name="stdrte" required>
+                <option value="Y">Yes</option>
+                <option value="N">No</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <label class="form-label">Oxygen Usage:</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div class="flex items-center">
+                <input type="checkbox" class="form-checkbox" id="o2used" name="o2used">
+                <label for="o2used" class="ml-2">Oxygen Used</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" class="form-checkbox" id="o2climb" name="o2climb">
+                <label for="o2climb" class="ml-2">Oxygen During Climb</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" class="form-checkbox" id="o2sleep" name="o2sleep">
+                <label for="o2sleep" class="ml-2">Oxygen During Sleep</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" class="form-checkbox" id="o2medical" name="o2medical">
+                <label for="o2medical" class="ml-2">Medical Oxygen</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <button type="submit" class="btn-primary">Predict Summit Time</button>
+    </div>
+</form>
+
+<div id="predictionResult" class="prediction-result">
+    <h3 class="text-xl font-semibold mb-2">Prediction Result</h3>
+    <p id="predictionText" class="mb-2"></p>
+    <div id="featureImportance" class="mt-4"></div>
+</div>
+
+<script>
+document.getElementById('summitTimeForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const formData = {
+        year: document.getElementById('year').value,
+        season: document.getElementById('season').value,
+        totmembers: document.getElementById('totmembers').value,
+        tothired: document.getElementById('tothired').value,
+        heightm: document.getElementById('heightm').value,
+        o2used: document.getElementById('o2used').checked,
+        o2climb: document.getElementById('o2climb').checked,
+        o2sleep: document.getElementById('o2sleep').checked,
+        o2medical: document.getElementById('o2medical').checked,
+        camps: document.getElementById('camps').value,
+        rope: document.getElementById('rope').value,
+        comrte: document.getElementById('comrte').value,
+        stdrte: document.getElementById('stdrte').value
+    };
+
+    fetch('/predict_summit_time', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            document.getElementById('predictionText').innerHTML = 
+                `<h3>Estimated time to reach the summit: ${result.predicted_days} days</h3>`;
+            
+            // Display feature importance
+            const importanceDiv = document.getElementById('featureImportance');
+            importanceDiv.innerHTML = '<h4 class="text-lg font-medium mb-4">Feature Importance</h4>';
+            for (const [feature, importance] of Object.entries(result.feature_importance)) {
+                const importanceBar = document.createElement('div');
+                importanceBar.className = 'mb-4';
+                importanceBar.innerHTML = `
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="font-medium">${feature}</span>
+                        <span class="text-gray-600">${(importance * 100).toFixed(2)}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-indigo-600 h-2.5 rounded-full" 
+                             style="width: ${importance * 100}%">
+                        </div>
+                    </div>
+                `;
+                importanceDiv.appendChild(importanceBar);
+            }
+            
+            document.getElementById('predictionResult').style.display = 'block';
+        } else {
+            document.getElementById('predictionText').innerHTML = 
+                `<h3 class="text-red-600">Error: ${result.error}</h3>`;
+            document.getElementById('predictionResult').style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('predictionText').innerHTML = 
+            '<h3 class="text-red-600">Error occurred while predicting summit time.</h3>';
+        document.getElementById('predictionResult').style.display = 'block';
+    });
+});
+</script>
+{% endblock %} 

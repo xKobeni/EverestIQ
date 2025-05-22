@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}EverestIQ Dashboard{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-8">Expedition Analytics Dashboard</h1>
+
+<!-- Overall Statistics -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-600 mb-2">Total Expeditions</h3>
+        <h2 id="total-expeditions" class="text-3xl font-bold text-gray-800">-</h2>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-600 mb-2">Successful Expeditions</h3>
+        <h2 id="successful-expeditions" class="text-3xl font-bold text-gray-800">-</h2>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-600 mb-2">Success Rate</h3>
+        <h2 id="success-rate" class="text-3xl font-bold text-gray-800">-</h2>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-600 mb-4">Success Rate by Season</h3>
+        <div class="h-80">
+            <canvas id="seasonChart"></canvas>
+        </div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-600 mb-4">Peak Difficulty Analysis</h3>
+        <div class="h-80">
+            <canvas id="peakChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-lg font-semibold text-gray-600 mb-4">Risk Assessment</h3>
+    <div class="h-80">
+        <canvas id="riskChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Fetch dashboard data
+    fetch('/api/dashboard/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDashboard(data.data);
+            } else {
+                console.error('Error loading dashboard data:', data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+
+    function updateDashboard(data) {
+        // Update statistics
+        document.getElementById('total-expeditions').textContent = data.overall.total_expeditions;
+        document.getElementById('successful-expeditions').textContent = data.overall.successful_expeditions;
+        document.getElementById('success-rate').textContent = data.overall.success_rate.toFixed(1) + '%';
+
+        // Season Chart
+        const seasonCtx = document.getElementById('seasonChart').getContext('2d');
+        new Chart(seasonCtx, {
+            type: 'bar',
+            data: {
+                labels: data.season_stats.map(s => s.season),
+                datasets: [{
+                    label: 'Success Rate (%)',
+                    data: data.season_stats.map(s => s.success_rate),
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Peak Chart
+        const peakCtx = document.getElementById('peakChart').getContext('2d');
+        new Chart(peakCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Peaks',
+                    data: data.peak_stats.map(p => ({
+                        x: p.height,
+                        y: p.success_rate
+                    })),
+                    backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                    borderColor: 'rgb(239, 68, 68)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Peak Height (m)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Success Rate (%)'
+                        },
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Risk Chart
+        const riskCtx = document.getElementById('riskChart').getContext('2d');
+        new Chart(riskCtx, {
+            type: 'line',
+            data: {
+                labels: data.risk_stats.map(r => `Team Size: ${r.team_size}`),
+                datasets: [{
+                    label: 'With Oxygen',
+                    data: data.risk_stats.filter(r => r.o2used === 'Y').map(r => r.success_rate),
+                    borderColor: 'rgb(16, 185, 129)',
+                    fill: false
+                }, {
+                    label: 'Without Oxygen',
+                    data: data.risk_stats.filter(r => r.o2used === 'N').map(r => r.success_rate),
+                    borderColor: 'rgb(245, 158, 11)',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %} 

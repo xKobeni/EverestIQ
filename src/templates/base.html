@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EverestIQ{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 text-white">
+            <div class="p-4">
+                <h1 class="text-2xl font-bold mb-8">EverestIQ</h1>
+                <nav>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="/dashboard" class="flex items-center p-2 rounded hover:bg-gray-700 {% if request.endpoint == 'dashboard.dashboard' %}bg-gray-700{% endif %}">
+                                <i class="fas fa-chart-line w-6"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/prediction" class="flex items-center p-2 rounded hover:bg-gray-700 {% if request.endpoint == 'prediction.prediction' %}bg-gray-700{% endif %}">
+                                <i class="fas fa-mountain w-6"></i>
+                                <span>Expedition Predictor</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/fatality_risk" class="flex items-center p-2 rounded hover:bg-gray-700 {% if request.endpoint == 'fatality_risk.fatality_risk' %}bg-gray-700{% endif %}">
+                                <i class="fas fa-skull-crossbones w-6"></i>
+                                <span>Fatality Risk Tool</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/summit_time" class="flex items-center p-2 rounded hover:bg-gray-700 {% if request.endpoint == 'summit_time.summit_time_form' %}bg-gray-700{% endif %}">
+                                <i class="fas fa-clock w-6"></i>
+                                <span>Summit Time Estimation</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/peak-difficulty" class="flex items-center p-2 rounded hover:bg-gray-700 {% if request.endpoint == 'peak_difficulty.peak_difficulty_form' %}bg-gray-700{% endif %}">
+                                <i class="fas fa-chart-bar w-6"></i>
+                                <span>Peak Difficulty Classification</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <div class="p-8">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html> 
