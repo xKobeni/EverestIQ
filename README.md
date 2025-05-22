@@ -86,6 +86,59 @@ python src/app.py
 
 3. Access the application at `http://localhost:5000`
 
+## 🎯 Training the Models
+
+### Expedition Success Model (Model 1)
+1. Navigate to the model directory:
+```bash
+cd src/Machine_learning/model_1
+```
+
+2. Run the training script:
+```bash
+python train_model.py
+```
+
+### Fatality Risk Model (Model 2)
+1. Navigate to the model directory:
+```bash
+cd src/Machine_learning/model_2
+```
+
+2. Run the training script:
+```bash
+python train_model.py
+```
+
+### Summit Time Model (Model 3)
+1. Navigate to the model directory:
+```bash
+cd src/Machine_learning/model_3
+```
+
+2. Run the training script:
+```bash
+python train_model.py
+```
+
+### Peak Difficulty Model (Model 4)
+1. Navigate to the model directory:
+```bash
+cd src/Machine_learning/model_4
+```
+
+2. Run the training script:
+```bash
+python peak_difficulty_model.py
+```
+
+Note: Make sure you have preprocessed the data before training the models. The training process will:
+- Load and prepare the data
+- Train the models
+- Save the trained models to the appropriate directories
+- Generate model performance metrics
+
+
 ## 📊 Data Sources
 
 The application uses several datasets:
@@ -94,23 +147,6 @@ The application uses several datasets:
 - `members.csv`: Expedition member data
 - `cleaned_exped.csv`: Preprocessed expedition data
 - `himalayan_data_dictionary.csv`: Data field descriptions
-
-## 🤖 Machine Learning Models
-
-### Peak Difficulty Model
-- Uses Random Forest Classifier with K-means clustering
-- Features:
-  - Success rate
-  - Average team size
-  - Fatality rate
-  - Average time to summit
-  - Total expeditions
-  - Oxygen usage rate
-  - Commercial route rate
-
-### Fatality Risk Model
-- Located in `model_2/`
-- Predicts risk factors for expeditions
 
 ## 🔧 API Endpoints
 
